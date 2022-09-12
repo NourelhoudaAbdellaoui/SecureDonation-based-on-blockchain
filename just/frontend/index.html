@@ -1,0 +1,171 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <title>Secure Donation</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-u1OknCvxWvY5kfmNBILK2hRnQC3Pr17a+RTT6rIHI7NnikvbZlHgTPOOmMi466C8" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="styles.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+</head>
+<body>
+
+
+
+    <h3>Secure Donation</h3>
+
+    
+          
+    
+    <button type="button" class="btn btn-warning" class="enableEthereumButton"><em>Connect</em></button> 
+    <br>(<em>address:</em> <span class="showAccount"></span>)<br>
+    <br>
+    <form>
+       
+    <input type="text" placeholder="name"  id="your_name"> <br><br>
+    <input type="text" placeholder="eth"  id="your_eth"> <br>
+    <br>
+    <button type="button" class="btn btn-success" onclick="donateFunction();"><em>Donate</em></button> <br>
+    </form>
+    
+
+   
+<script>
+//Enable Web3
+async function loadWeb3(){
+    if(window.ethereum) {
+        window.web3 = new Web3(window.ethereum);
+    }
+}
+// Load Contract
+async function loadContract(){
+    return await new window.web3.eth.Contract(
+        [
+        {
+            "inputs": [
+                {
+                    "internalType": "string",
+                    "name": "name",
+                    "type": "string"
+                }
+            ],
+            "name": "addPerson",
+            "outputs": [],
+            "stateMutability": "payable",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "",
+                    "type": "uint256"
+                }
+            ],
+            "name": "people",
+            "outputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "id",
+                    "type": "uint256"
+                },
+                {
+                    "internalType": "string",
+                    "name": "name",
+                    "type": "string"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "amount",
+                    "type": "uint256"
+                },
+                {
+                    "internalType": "address",
+                    "name": "sender_address",
+                    "type": "address"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        }
+    ]
+       
+        
+       
+   
+        ,'0xa60a72C39F20a6ea0D282191FE0A4dBBba466D17');
+}
+
+// Read data from the contract
+async function getFunction() {
+    for (let i = 1; i <= 100; i++) {
+        get = await window.contract.methods.people(i).call();
+        if ( get[0] != 0 ){ // Continue for a loop until the ID is not equal to 0.
+            document.getElementById('people' +i).innerHTML = get[1] + ": ";
+            document.getElementById('price' +i).innerHTML = get[2]/1000000000000000000 + " ("; // Change wei to ETH
+            document.getElementById('address' +i).innerHTML = get[3] + ") <br>";
+        } else break;
+    }
+}
+// Load all functions
+async function load(){
+    await loadWeb3(); //Enable Web3
+    window.contract = await loadContract(); //Load Contract
+    getFunction(); //Read data from the contract
+}
+load();
+// Connect to MetaMask by clicking connect button. 
+const ethereumButton = document.querySelector('.enableEthereumButton');
+const showAccount = document.querySelector('.showAccount');
+ethereumButton.addEventListener('click', () => {
+    getAccount();
+});
+// Get the user's wallet address
+async function getAccount() {
+    const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
+    showAccount.innerHTML = accounts;
+    return account = accounts[0];
+}
+// Donate function
+async function donateFunction() {
+    $name = document.getElementById('your_name').value;
+    $wei = document.getElementById('your_eth').value;
+    $eth = $wei * 1000000000000000000; // Change wei to ETH
+    $account = await getAccount();
+    set = await window.contract.methods.addPerson($name).send(
+        { 
+            from: $account,
+            value: $eth
+        }
+    );
+}
+</script>
+
+<style>
+    @keyframes color {
+        0%   { background: #33CCCC; }
+        20%  { background: #33CC36; }
+        40%  { background: #B8CC33; }
+        60%  { background: #FCCA00; }
+        80%  { background: #33CC36; }
+        100% { background: #33CCCC; }
+      }
+      
+      body {
+        background: #33CCCC; /* Fallback */
+        animation: color 9s infinite linear;
+        text-align: center;
+        padding: 2em;
+      }
+      h1 {
+        text-align: center;
+        font-family: 'Kavoon', sans-serif;
+        font-size: 2.5em;
+        color: white;
+}
+</style>
+
+
+</body>
+
+</html>
